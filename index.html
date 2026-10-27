@@ -63,6 +63,47 @@
     .header-title p  { font-size: 11px; opacity: 0.75; font-weight: 400; }
     .header-date { font-size: 12px; opacity: 0.7; }
 
+    /* ── Month Filter Bar ── */
+    .filter-bar {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-bar label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .month-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .month-btn {
+      padding: 5px 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      font-family: inherit;
+    }
+    .month-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .month-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+
     /* ── Main Layout ── */
     main {
       max-width: 1200px;
@@ -115,6 +156,7 @@
       color: var(--primary);
       line-height: 1.1;
       margin-bottom: 4px;
+      transition: color 0.2s;
     }
     .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
 
@@ -265,6 +307,7 @@
       .stat-number { font-size: 40px; }
       .header-title h1 { font-size: 15px; }
       .header-date { display: none; }
+      .filter-bar { padding: 10px 14px; }
     }
   </style>
 </head>
@@ -282,6 +325,12 @@
   <div class="header-date" id="live-date"></div>
 </header>
 
+<!-- ═══ MONTH FILTER BAR ═══ -->
+<div class="filter-bar">
+  <label>📅 Tapis Bulan · Filter by Month:</label>
+  <div class="month-tabs" id="month-tabs"></div>
+</div>
+
 <main>
   <div class="dashboard-grid">
 
@@ -294,14 +343,9 @@
           <p>Students Registered</p>
         </div>
       </div>
-      <div class="stat-number">342</div>
+      <div class="stat-number" id="students-total">—</div>
       <div class="stat-label">Jumlah Pelajar · Total Students</div>
-      <div class="pill-list">
-        <div class="pill">Elektrik · Electrical <span>120</span></div>
-        <div class="pill">Kimpalan · Welding <span>98</span></div>
-        <div class="pill">ICT <span>74</span></div>
-        <div class="pill">Automotif · Automotive <span>50</span></div>
-      </div>
+      <div class="pill-list" id="students-pills"></div>
     </section>
 
     <!-- ═══ SECTION 2: TASKS REMAINING ═══ -->
@@ -313,22 +357,18 @@
           <p>Tasks Remaining</p>
         </div>
       </div>
-      <div class="stat-number" style="color: var(--warning);">7</div>
-      <div class="stat-label">daripada 15 tugasan · of 15 tasks</div>
+      <div class="stat-number" id="tasks-remaining" style="color: var(--warning);">—</div>
+      <div class="stat-label" id="tasks-label">daripada — tugasan · of — tasks</div>
       <div class="progress-wrap">
         <div class="progress-label">
           <span>Kemajuan · Progress</span>
-          <span>53%</span>
+          <span id="tasks-pct">—%</span>
         </div>
         <div class="progress-track">
-          <div class="progress-fill" style="width: 53%;"></div>
+          <div class="progress-fill" id="tasks-bar" style="width: 0%;"></div>
         </div>
       </div>
-      <ul class="pending-list">
-        <li>Hantar jadual latihan · Submit training schedules</li>
-        <li>Sahkan tempahan venue · Confirm venue bookings</li>
-        <li>Muat naik borang kebenaran · Upload learner consent forms</li>
-      </ul>
+      <ul class="pending-list" id="tasks-pending"></ul>
     </section>
 
     <!-- ═══ SECTION 3: WORKSHOP STATUS ═══ -->
@@ -350,38 +390,7 @@
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>Elektrik · Electrical</td>
-              <td>En. Dlamini</td>
-              <td>30</td>
-              <td><span class="badge badge--ready">Sedia · Ready</span></td>
-            </tr>
-            <tr>
-              <td>Kimpalan · Welding</td>
-              <td>Pn. Khumalo</td>
-              <td>25</td>
-              <td><span class="badge badge--progress">Dalam Proses · In Progress</span></td>
-            </tr>
-            <tr>
-              <td>ICT</td>
-              <td>En. Nkosi</td>
-              <td>40</td>
-              <td><span class="badge badge--ready">Sedia · Ready</span></td>
-            </tr>
-            <tr>
-              <td>Automotif · Automotive</td>
-              <td>Pn. Mokoena</td>
-              <td>20</td>
-              <td><span class="badge badge--pending">Tertunggak · Pending</span></td>
-            </tr>
-            <tr>
-              <td>Paip · Plumbing</td>
-              <td>En. Sithole</td>
-              <td>15</td>
-              <td><span class="badge badge--progress">Dalam Proses · In Progress</span></td>
-            </tr>
-          </tbody>
+          <tbody id="workshops-tbody"></tbody>
         </table>
       </div>
     </section>
@@ -395,16 +404,7 @@
           <p>Preparation Checklist</p>
         </div>
       </div>
-      <ul class="checklist" id="checklist-list">
-        <li><label><input type="checkbox" /> Daftarkan pelajar dalam sistem TVET · Register learners on TVET system</label></li>
-        <li><label><input type="checkbox" /> Cetak daftar kehadiran · Print attendance registers</label></li>
-        <li><label><input type="checkbox" /> Sediakan PPE untuk bengkel · Prepare PPE for workshops</label></li>
-        <li><label><input type="checkbox" /> Sediakan projektor di dewan kuliah · Set up projector in lecture hall</label></li>
-        <li><label><input type="checkbox" /> Taklimat jurulatih bengkel · Brief workshop trainers</label></li>
-        <li><label><input type="checkbox" /> Sahkan penyediaan makanan hari orientasi · Confirm catering for orientation day</label></li>
-        <li><label><input type="checkbox" /> Uji sambungan internet · Test internet connectivity</label></li>
-        <li><label><input type="checkbox" /> Edarkan buku panduan pelajar · Distribute learner handbooks</label></li>
-      </ul>
+      <ul class="checklist" id="checklist-list"></ul>
       <p class="checklist-count" id="checklist-count">
         <strong>0</strong> daripada 8 selesai · of 8 completed
       </p>
@@ -419,34 +419,219 @@
 </footer>
 
 <script>
-  // Live date in header
-  (function () {
-    const el = document.getElementById('live-date');
-    const now = new Date();
-    const opts = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-    el.textContent = now.toLocaleDateString('ms-MY', opts);
-  })();
+// ══════════════════════════════════════════════
+//  DATA — satu rekod per bulan (Jan–Jun 2025)
+// ══════════════════════════════════════════════
+var MONTHS = [
+  { key: 'jan', label: 'Jan 2025' },
+  { key: 'feb', label: 'Feb 2025' },
+  { key: 'mar', label: 'Mac 2025' },
+  { key: 'apr', label: 'Apr 2025' },
+  { key: 'may', label: 'Mei 2025' },
+  { key: 'jun', label: 'Jun 2025' }
+];
 
-  // Checklist interactivity
-  (function () {
-    const list  = document.getElementById('checklist-list');
-    const count = document.getElementById('checklist-count');
-    const total = list.querySelectorAll('input[type="checkbox"]').length;
+var DATA = {
+  jan: {
+    students: { total: 280, programs: [{ name: 'Elektrik · Electrical', n: 100 }, { name: 'Kimpalan · Welding', n: 80 }, { name: 'ICT', n: 60 }, { name: 'Automotif · Automotive', n: 40 }] },
+    tasks: { remaining: 10, total: 15, pending: ['Hantar jadual latihan · Submit training schedules', 'Sahkan tempahan venue · Confirm venue bookings', 'Muat naik borang kebenaran · Upload learner consent forms'] },
+    workshops: [
+      { name: 'Elektrik · Electrical', trainer: 'En. Dlamini', capacity: 30, status: 'pending' },
+      { name: 'Kimpalan · Welding', trainer: 'Pn. Khumalo', capacity: 25, status: 'pending' },
+      { name: 'ICT', trainer: 'En. Nkosi', capacity: 40, status: 'progress' },
+      { name: 'Automotif · Automotive', trainer: 'Pn. Mokoena', capacity: 20, status: 'pending' },
+      { name: 'Paip · Plumbing', trainer: 'En. Sithole', capacity: 15, status: 'pending' }
+    ],
+    checklist: [false, false, false, false, false, false, false, false]
+  },
+  feb: {
+    students: { total: 295, programs: [{ name: 'Elektrik · Electrical', n: 105 }, { name: 'Kimpalan · Welding', n: 85 }, { name: 'ICT', n: 65 }, { name: 'Automotif · Automotive', n: 40 }] },
+    tasks: { remaining: 8, total: 15, pending: ['Sahkan tempahan venue · Confirm venue bookings', 'Muat naik borang kebenaran · Upload learner consent forms', 'Cetak sijil pelajar · Print learner certificates'] },
+    workshops: [
+      { name: 'Elektrik · Electrical', trainer: 'En. Dlamini', capacity: 30, status: 'progress' },
+      { name: 'Kimpalan · Welding', trainer: 'Pn. Khumalo', capacity: 25, status: 'pending' },
+      { name: 'ICT', trainer: 'En. Nkosi', capacity: 40, status: 'ready' },
+      { name: 'Automotif · Automotive', trainer: 'Pn. Mokoena', capacity: 20, status: 'progress' },
+      { name: 'Paip · Plumbing', trainer: 'En. Sithole', capacity: 15, status: 'pending' }
+    ],
+    checklist: [true, false, false, false, false, false, false, false]
+  },
+  mar: {
+    students: { total: 318, programs: [{ name: 'Elektrik · Electrical', n: 112 }, { name: 'Kimpalan · Welding', n: 90 }, { name: 'ICT', n: 70 }, { name: 'Automotif · Automotive', n: 46 }] },
+    tasks: { remaining: 7, total: 15, pending: ['Muat naik borang kebenaran · Upload learner consent forms', 'Cetak sijil pelajar · Print learner certificates', 'Uji sistem e-Pembelajaran · Test e-Learning system'] },
+    workshops: [
+      { name: 'Elektrik · Electrical', trainer: 'En. Dlamini', capacity: 30, status: 'ready' },
+      { name: 'Kimpalan · Welding', trainer: 'Pn. Khumalo', capacity: 25, status: 'progress' },
+      { name: 'ICT', trainer: 'En. Nkosi', capacity: 40, status: 'ready' },
+      { name: 'Automotif · Automotive', trainer: 'Pn. Mokoena', capacity: 20, status: 'progress' },
+      { name: 'Paip · Plumbing', trainer: 'En. Sithole', capacity: 15, status: 'pending' }
+    ],
+    checklist: [true, true, false, false, false, false, false, false]
+  },
+  apr: {
+    students: { total: 330, programs: [{ name: 'Elektrik · Electrical', n: 115 }, { name: 'Kimpalan · Welding', n: 94 }, { name: 'ICT', n: 72 }, { name: 'Automotif · Automotive', n: 49 }] },
+    tasks: { remaining: 5, total: 15, pending: ['Cetak sijil pelajar · Print learner certificates', 'Uji sistem e-Pembelajaran · Test e-Learning system', 'Kemaskini rekod pelajar · Update learner records'] },
+    workshops: [
+      { name: 'Elektrik · Electrical', trainer: 'En. Dlamini', capacity: 30, status: 'ready' },
+      { name: 'Kimpalan · Welding', trainer: 'Pn. Khumalo', capacity: 25, status: 'ready' },
+      { name: 'ICT', trainer: 'En. Nkosi', capacity: 40, status: 'ready' },
+      { name: 'Automotif · Automotive', trainer: 'Pn. Mokoena', capacity: 20, status: 'progress' },
+      { name: 'Paip · Plumbing', trainer: 'En. Sithole', capacity: 15, status: 'progress' }
+    ],
+    checklist: [true, true, true, true, false, false, false, false]
+  },
+  may: {
+    students: { total: 338, programs: [{ name: 'Elektrik · Electrical', n: 118 }, { name: 'Kimpalan · Welding', n: 96 }, { name: 'ICT', n: 73 }, { name: 'Automotif · Automotive', n: 51 }] },
+    tasks: { remaining: 3, total: 15, pending: ['Uji sistem e-Pembelajaran · Test e-Learning system', 'Kemaskini rekod pelajar · Update learner records', 'Hantar laporan bulanan · Submit monthly report'] },
+    workshops: [
+      { name: 'Elektrik · Electrical', trainer: 'En. Dlamini', capacity: 30, status: 'ready' },
+      { name: 'Kimpalan · Welding', trainer: 'Pn. Khumalo', capacity: 25, status: 'ready' },
+      { name: 'ICT', trainer: 'En. Nkosi', capacity: 40, status: 'ready' },
+      { name: 'Automotif · Automotive', trainer: 'Pn. Mokoena', capacity: 20, status: 'ready' },
+      { name: 'Paip · Plumbing', trainer: 'En. Sithole', capacity: 15, status: 'progress' }
+    ],
+    checklist: [true, true, true, true, true, true, false, false]
+  },
+  jun: {
+    students: { total: 342, programs: [{ name: 'Elektrik · Electrical', n: 120 }, { name: 'Kimpalan · Welding', n: 98 }, { name: 'ICT', n: 74 }, { name: 'Automotif · Automotive', n: 50 }] },
+    tasks: { remaining: 2, total: 15, pending: ['Kemaskini rekod pelajar · Update learner records', 'Hantar laporan bulanan · Submit monthly report'] },
+    workshops: [
+      { name: 'Elektrik · Electrical', trainer: 'En. Dlamini', capacity: 30, status: 'ready' },
+      { name: 'Kimpalan · Welding', trainer: 'Pn. Khumalo', capacity: 25, status: 'ready' },
+      { name: 'ICT', trainer: 'En. Nkosi', capacity: 40, status: 'ready' },
+      { name: 'Automotif · Automotive', trainer: 'Pn. Mokoena', capacity: 20, status: 'ready' },
+      { name: 'Paip · Plumbing', trainer: 'En. Sithole', capacity: 15, status: 'ready' }
+    ],
+    checklist: [true, true, true, true, true, true, true, true]
+  }
+};
 
-    function updateCount() {
-      const done = list.querySelectorAll('input[type="checkbox"]:checked').length;
-      count.innerHTML =
-        '<strong>' + done + '</strong> daripada ' + total + ' selesai &middot; of ' + total + ' completed';
-    }
+var CHECKLIST_ITEMS = [
+  'Daftarkan pelajar dalam sistem TVET · Register learners on TVET system',
+  'Cetak daftar kehadiran · Print attendance registers',
+  'Sediakan PPE untuk bengkel · Prepare PPE for workshops',
+  'Sediakan projektor di dewan kuliah · Set up projector in lecture hall',
+  'Taklimat jurulatih bengkel · Brief workshop trainers',
+  'Sahkan penyediaan makanan hari orientasi · Confirm catering for orientation day',
+  'Uji sambungan internet · Test internet connectivity',
+  'Edarkan buku panduan pelajar · Distribute learner handbooks'
+];
 
-    list.addEventListener('change', function (e) {
-      if (e.target.type === 'checkbox') {
-        const li = e.target.closest('li');
-        li.classList.toggle('checked', e.target.checked);
-        updateCount();
-      }
+var BADGE = {
+  ready:    { cls: 'badge--ready',    label: 'Sedia · Ready' },
+  progress: { cls: 'badge--progress', label: 'Dalam Proses · In Progress' },
+  pending:  { cls: 'badge--pending',  label: 'Tertunggak · Pending' }
+};
+
+var activeMonth = 'jun'; // default to latest month
+
+// ── Build month tabs ──
+(function () {
+  var el = document.getElementById('live-date');
+  var now = new Date();
+  el.textContent = now.toLocaleDateString('ms-MY', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+
+  var tabs = document.getElementById('month-tabs');
+  MONTHS.forEach(function (m) {
+    var btn = document.createElement('button');
+    btn.className = 'month-btn' + (m.key === activeMonth ? ' active' : '');
+    btn.textContent = m.label;
+    btn.setAttribute('data-month', m.key);
+    btn.addEventListener('click', function () {
+      activeMonth = m.key;
+      document.querySelectorAll('.month-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      renderAll(activeMonth);
     });
-  })();
+    tabs.appendChild(btn);
+  });
+})();
+
+// ── Render all sections ──
+function renderAll(mkey) {
+  var d = DATA[mkey];
+  renderStudents(d.students);
+  renderTasks(d.tasks);
+  renderWorkshops(d.workshops);
+  renderChecklist(d.checklist);
+}
+
+function renderStudents(s) {
+  document.getElementById('students-total').textContent = s.total;
+  var pills = document.getElementById('students-pills');
+  pills.innerHTML = '';
+  s.programs.forEach(function (p) {
+    var div = document.createElement('div');
+    div.className = 'pill';
+    div.innerHTML = p.name + ' <span>' + p.n + '</span>';
+    pills.appendChild(div);
+  });
+}
+
+function renderTasks(t) {
+  var done = t.total - t.remaining;
+  var pct = Math.round((done / t.total) * 100);
+  document.getElementById('tasks-remaining').textContent = t.remaining;
+  document.getElementById('tasks-label').textContent = 'daripada ' + t.total + ' tugasan · of ' + t.total + ' tasks';
+  document.getElementById('tasks-pct').textContent = pct + '%';
+  document.getElementById('tasks-bar').style.width = pct + '%';
+  var ul = document.getElementById('tasks-pending');
+  ul.innerHTML = '';
+  t.pending.forEach(function (item) {
+    var li = document.createElement('li');
+    li.textContent = item;
+    ul.appendChild(li);
+  });
+}
+
+function renderWorkshops(ws) {
+  var tbody = document.getElementById('workshops-tbody');
+  tbody.innerHTML = '';
+  ws.forEach(function (w) {
+    var b = BADGE[w.status];
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + w.name + '</td>' +
+      '<td>' + w.trainer + '</td>' +
+      '<td>' + w.capacity + '</td>' +
+      '<td><span class="badge ' + b.cls + '">' + b.label + '</span></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function renderChecklist(states) {
+  var ul = document.getElementById('checklist-list');
+  ul.innerHTML = '';
+  CHECKLIST_ITEMS.forEach(function (item, i) {
+    var li = document.createElement('li');
+    if (states[i]) li.classList.add('checked');
+    li.innerHTML = '<label><input type="checkbox"' + (states[i] ? ' checked' : '') + ' /> ' + item + '</label>';
+    ul.appendChild(li);
+  });
+  updateChecklistCount();
+
+  ul.addEventListener('change', function (e) {
+    if (e.target.type === 'checkbox') {
+      var li = e.target.closest('li');
+      li.classList.toggle('checked', e.target.checked);
+      // sync back to data so re-renders preserve state
+      var idx = Array.from(ul.children).indexOf(li);
+      DATA[activeMonth].checklist[idx] = e.target.checked;
+      updateChecklistCount();
+    }
+  });
+}
+
+function updateChecklistCount() {
+  var ul = document.getElementById('checklist-list');
+  var total = ul.querySelectorAll('input[type="checkbox"]').length;
+  var done  = ul.querySelectorAll('input[type="checkbox"]:checked').length;
+  document.getElementById('checklist-count').innerHTML =
+    '<strong>' + done + '</strong> daripada ' + total + ' selesai &middot; of ' + total + ' completed';
+}
+
+// ── Initial render ──
+renderAll(activeMonth);
 </script>
 
 </body>
