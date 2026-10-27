@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PSH KKBDA Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── CSS Variables ── */
+    :root {
+      --primary: #1d6fb8;
+      --primary-light: #e8f1fb;
+      --bg: #f0f4f8;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --accent: #16a34a;
+      --accent-light: #dcfce7;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --header-bg: #1d3f6b;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+    }
+    ul { list-style: none; }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--header-bg);
+      color: #fff;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-logo {
+      width: 40px; height: 40px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .header-title h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+    .header-title p  { font-size: 11px; opacity: 0.75; font-weight: 400; }
+    .header-date { font-size: 12px; opacity: 0.7; }
+
+    /* ── Main Layout ── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    /* ── Dashboard Grid ── */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 22px;
+    }
+    .card--wide { grid-column: 1 / -1; }
+
+    /* ── Card Base ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+    .card-icon--blue  { background: var(--primary-light); }
+    .card-icon--green { background: var(--accent-light); }
+    .card-icon--orange{ background: var(--warning-light); }
+    .card-icon--purple{ background: #f3e8ff; }
+    .card-header-text h2 { font-size: 14px; font-weight: 600; color: var(--text); }
+    .card-header-text p  { font-size: 11px; color: var(--muted); }
+
+    /* ── Stat Number ── */
+    .stat-number {
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+
+    /* ── Pills ── */
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pill span { font-weight: 600; color: var(--primary); }
+
+    /* ── Progress Bar ── */
+    .progress-wrap { margin: 6px 0 16px; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress-track {
+      height: 10px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+    .pending-list li {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pending-list li::before {
+      content: "•";
+      color: var(--warning);
+      font-size: 16px;
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    thead th {
+      text-align: left;
+      padding: 9px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      background: var(--bg);
+    }
+    tbody tr { border-top: 1px solid var(--border); }
+    tbody tr:hover { background: #f8fafc; }
+    tbody td { padding: 11px 14px; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge--ready    { background: var(--accent-light);  color: #166534; }
+    .badge--progress { background: var(--warning-light); color: #92400e; }
+    .badge--pending  { background: var(--danger-light);  color: #991b1b; }
+
+    /* ── Checklist ── */
+    .checklist { display: flex; flex-direction: column; gap: 10px; }
+    .checklist li label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13.5px;
+      color: var(--text);
+      transition: opacity 0.2s;
+    }
+    .checklist li input[type="checkbox"] {
+      appearance: none;
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 5px;
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .checklist li input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .checklist li input[type="checkbox"]:checked::after {
+      content: "✓";
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .checklist li.checked label {
+      text-decoration: line-through;
+      opacity: 0.45;
+    }
+    .checklist-count {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .checklist-count strong { color: var(--accent); font-weight: 700; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 22px 20px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 10px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .stat-number { font-size: 40px; }
+      .header-title h1 { font-size: 15px; }
+      .header-date { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="header-left">
+    <div class="header-logo">🎓</div>
+    <div class="header-title">
+      <h1>PSH KKBDA Dashboard</h1>
+      <p>Papan Pemuka Prestasi · Performance Dashboard</p>
+    </div>
+  </div>
+  <div class="header-date" id="live-date"></div>
+</header>
+
+<main>
+  <div class="dashboard-grid">
+
+    <!-- ═══ SECTION 1: STUDENTS REGISTERED ═══ -->
+    <section class="card" id="students">
+      <div class="card-header">
+        <div class="card-icon card-icon--blue">👥</div>
+        <div class="card-header-text">
+          <h2>Pelajar Berdaftar</h2>
+          <p>Students Registered</p>
+        </div>
+      </div>
+      <div class="stat-number">342</div>
+      <div class="stat-label">Jumlah Pelajar · Total Students</div>
+      <div class="pill-list">
+        <div class="pill">Elektrik · Electrical <span>120</span></div>
+        <div class="pill">Kimpalan · Welding <span>98</span></div>
+        <div class="pill">ICT <span>74</span></div>
+        <div class="pill">Automotif · Automotive <span>50</span></div>
+      </div>
+    </section>
+
+    <!-- ═══ SECTION 2: TASKS REMAINING ═══ -->
+    <section class="card" id="tasks">
+      <div class="card-header">
+        <div class="card-icon card-icon--orange">📋</div>
+        <div class="card-header-text">
+          <h2>Tugasan Berbaki</h2>
+          <p>Tasks Remaining</p>
+        </div>
+      </div>
+      <div class="stat-number" style="color: var(--warning);">7</div>
+      <div class="stat-label">daripada 15 tugasan · of 15 tasks</div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Kemajuan · Progress</span>
+          <span>53%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 53%;"></div>
+        </div>
+      </div>
+      <ul class="pending-list">
+        <li>Hantar jadual latihan · Submit training schedules</li>
+        <li>Sahkan tempahan venue · Confirm venue bookings</li>
+        <li>Muat naik borang kebenaran · Upload learner consent forms</li>
+      </ul>
+    </section>
+
+    <!-- ═══ SECTION 3: WORKSHOP STATUS ═══ -->
+    <section class="card card--wide" id="workshops">
+      <div class="card-header">
+        <div class="card-icon card-icon--green">🔧</div>
+        <div class="card-header-text">
+          <h2>Status Bengkel</h2>
+          <p>Workshop Status</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bengkel · Workshop</th>
+              <th>Jurulatih · Trainer</th>
+              <th>Kapasiti · Capacity</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Elektrik · Electrical</td>
+              <td>En. Dlamini</td>
+              <td>30</td>
+              <td><span class="badge badge--ready">Sedia · Ready</span></td>
+            </tr>
+            <tr>
+              <td>Kimpalan · Welding</td>
+              <td>Pn. Khumalo</td>
+              <td>25</td>
+              <td><span class="badge badge--progress">Dalam Proses · In Progress</span></td>
+            </tr>
+            <tr>
+              <td>ICT</td>
+              <td>En. Nkosi</td>
+              <td>40</td>
+              <td><span class="badge badge--ready">Sedia · Ready</span></td>
+            </tr>
+            <tr>
+              <td>Automotif · Automotive</td>
+              <td>Pn. Mokoena</td>
+              <td>20</td>
+              <td><span class="badge badge--pending">Tertunggak · Pending</span></td>
+            </tr>
+            <tr>
+              <td>Paip · Plumbing</td>
+              <td>En. Sithole</td>
+              <td>15</td>
+              <td><span class="badge badge--progress">Dalam Proses · In Progress</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══ SECTION 4: PREPARATION CHECKLIST ═══ -->
+    <section class="card card--wide" id="checklist">
+      <div class="card-header">
+        <div class="card-icon card-icon--purple">✅</div>
+        <div class="card-header-text">
+          <h2>Senarai Semak Persediaan</h2>
+          <p>Preparation Checklist</p>
+        </div>
+      </div>
+      <ul class="checklist" id="checklist-list">
+        <li><label><input type="checkbox" /> Daftarkan pelajar dalam sistem TVET · Register learners on TVET system</label></li>
+        <li><label><input type="checkbox" /> Cetak daftar kehadiran · Print attendance registers</label></li>
+        <li><label><input type="checkbox" /> Sediakan PPE untuk bengkel · Prepare PPE for workshops</label></li>
+        <li><label><input type="checkbox" /> Sediakan projektor di dewan kuliah · Set up projector in lecture hall</label></li>
+        <li><label><input type="checkbox" /> Taklimat jurulatih bengkel · Brief workshop trainers</label></li>
+        <li><label><input type="checkbox" /> Sahkan penyediaan makanan hari orientasi · Confirm catering for orientation day</label></li>
+        <li><label><input type="checkbox" /> Uji sambungan internet · Test internet connectivity</label></li>
+        <li><label><input type="checkbox" /> Edarkan buku panduan pelajar · Distribute learner handbooks</label></li>
+      </ul>
+      <p class="checklist-count" id="checklist-count">
+        <strong>0</strong> daripada 8 selesai · of 8 completed
+      </p>
+    </section>
+
+  </div><!-- /.dashboard-grid -->
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  PSH KKBDA Dashboard &copy; 2025 &mdash; Pusat Kemahiran Berdaftar &middot; Registered Skills Centre
+</footer>
+
+<script>
+  // Live date in header
+  (function () {
+    const el = document.getElementById('live-date');
+    const now = new Date();
+    const opts = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+    el.textContent = now.toLocaleDateString('ms-MY', opts);
+  })();
+
+  // Checklist interactivity
+  (function () {
+    const list  = document.getElementById('checklist-list');
+    const count = document.getElementById('checklist-count');
+    const total = list.querySelectorAll('input[type="checkbox"]').length;
+
+    function updateCount() {
+      const done = list.querySelectorAll('input[type="checkbox"]:checked').length;
+      count.innerHTML =
+        '<strong>' + done + '</strong> daripada ' + total + ' selesai &middot; of ' + total + ' completed';
+    }
+
+    list.addEventListener('change', function (e) {
+      if (e.target.type === 'checkbox') {
+        const li = e.target.closest('li');
+        li.classList.toggle('checked', e.target.checked);
+        updateCount();
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
